@@ -61,6 +61,7 @@ else:
     triggers = ["HLT_PFHT1050","HLT_PFJet500","HLT_AK8PFJet380_TrimMass30","HLT_AK8PFJet400_TrimMass30"]
 
 varnames = {
+        'lead_jetPt':'Jet p_{T}',
         'lead_tau32':'#tau_{32}^{jet0}',
         'sublead_tau32':'#tau_{32}^{jet1}',
         'lead_tau21':'#tau_{21}^{jet0}',
@@ -100,6 +101,7 @@ def select(setname,year):
     a.Cut("hemis","(jetIdx[0] != -1)&&(jetIdx[1] != -1)") # cut on that calculation
     a.Cut('pt_cut','FatJet_pt[jetIdx[0]] > 400 && FatJet_pt[jetIdx[1]] > 400')
     a.Cut('eta_cut','abs(FatJet_eta[jetIdx[0]]) < 2.4 && abs(FatJet_eta[jetIdx[1]]) < 2.4')
+    a.Define('lead_jetPt','FatJet_pt[jetIdx[0]]') 
     a.Define('lead_tau32','FatJet_tau2[jetIdx[0]] > 0 ? FatJet_tau3[jetIdx[0]]/FatJet_tau2[jetIdx[0]] : -1') # Conditional to make sure tau2 != 0 for division
     a.Define('sublead_tau32','FatJet_tau2[jetIdx[1]] > 0 ? FatJet_tau3[jetIdx[1]]/FatJet_tau2[jetIdx[1]] : -1') # condition ? <do if true> : <do if false>
     a.Define('lead_tau21','FatJet_tau1[jetIdx[0]] > 0 ? FatJet_tau2[jetIdx[0]]/FatJet_tau1[jetIdx[0]] : -1') # Conditional to make sure tau2 != 0 for division
@@ -109,7 +111,10 @@ def select(setname,year):
     out = HistGroup("%s_%s"%(setname,year))
     for varname in varnames.keys():
         histname = '%s_%s_%s'%(setname,year,varname)
-        hist_tuple = (histname,histname,20,0,1)
+        if "tau" in varname :
+            hist_tuple = (histname,histname,20,0,1)
+        if "Pt" in varname :
+            hist_tuple = (histname,histname,30,400,1000)
         hist = a.GetActiveNode().DataFrame.Histo1D(hist_tuple,varname,'norm')
         hist.GetValue()
         out.Add(varname,hist)
